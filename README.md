@@ -167,4 +167,3 @@ todo-list/
 - **Backend**: FastAPI, SQLAlchemy, SQLite
 - **Authentication**: JWT tokens
 - **Containerization**: Docker, Docker Compose
-# maxsol-todolist-task
