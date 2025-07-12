@@ -1,5 +1,4 @@
-"use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Stack,
   Text,
@@ -8,6 +7,7 @@ import {
   Title,
   Center,
   Box,
+  Pagination,
 } from "@mantine/core";
 import { Task } from "@/hooks/useTasks";
 import { TaskItem } from "./task-item";
@@ -30,17 +30,25 @@ export function TaskList({
   onUpdate,
 }: TaskListProps) {
   const [filter, setFilter] = useState<"all" | "completed" | "active">("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
 
   const filteredTasks = useMemo(() => {
-    switch (filter) {
-      case "completed":
-        return tasks.filter((t) => t.completed);
-      case "active":
-        return tasks.filter((t) => !t.completed);
-      default:
-        return tasks;
-    }
+    if (filter === "completed") return tasks.filter((t) => t.completed);
+    if (filter === "active") return tasks.filter((t) => !t.completed);
+    return tasks;
   }, [tasks, filter]);
+
+  const paginatedTasks = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredTasks.slice(start, start + pageSize);
+  }, [filteredTasks, page]);
+
+  const totalPages = Math.ceil(filteredTasks.length / pageSize);
 
   if (tasks.length === 0) {
     return (
@@ -55,17 +63,17 @@ export function TaskList({
   return (
     <Box>
       <FilterPanel filter={filter} setFilter={setFilter} />
+
       <ScrollArea
-        style={{ height: "calc(100vh - 360px)" }}
-        type="always"
+        style={{ height: `calc(100vh - 480px)` }}
+        type="auto"
         offsetScrollbars
       >
-        <Stack gap="md">
-          <Title order={4} mb="sm">
-            Ваши задачи
-          </Title>
+        <Stack gap="md" p="sm">
+          <Title order={4}>Ваши задачи</Title>
           <Divider />
-          {filteredTasks.map((task) => (
+
+          {paginatedTasks.map((task) => (
             <TaskItem
               key={task.id}
               task={task}
@@ -74,15 +82,26 @@ export function TaskList({
               onUpdate={onUpdate}
             />
           ))}
-          {filteredTasks.length === 0 && (
+
+          {paginatedTasks.length === 0 && (
             <Center mt="xl">
-              <Text size="md" color="dimmed">
-                Нет задач по выбранному фильтру
-              </Text>
+              <Text color="dimmed">Нет задач по выбранному фильтру</Text>
             </Center>
           )}
         </Stack>
       </ScrollArea>
+
+      {totalPages > 1 && (
+        <Center my="md">
+          <Pagination
+            value={page}
+            onChange={setPage}
+            total={totalPages}
+            siblings={1}
+            boundaries={1}
+          />
+        </Center>
+      )}
     </Box>
   );
 }
