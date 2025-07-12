@@ -7,7 +7,6 @@ import {
   Divider,
   Title,
   Center,
-  SegmentedControl,
   Box,
 } from "@mantine/core";
 import { Task } from "@/hooks/useTasks";
