@@ -1,12 +1,20 @@
+version: "3.8"
 services:
   backend:
     build: ./backend
+    # Укажем, что все относительные пути — от /app
+    working_dir: /app
     ports:
       - "8000:8000"
     environment:
+      # relative path от working_dir: /app/test.db
       - DATABASE_URL=sqlite:///./test.db
-    volumes:
-      - ./backend/test.db:/app/test.db
+    # При старте:
+    # 1) touch test.db — создаёт файл, если его нет
+    # 2) запускает FastAPI
+    command: >
+      sh -c "touch test.db &&
+             uvicorn main:app --host 0.0.0.0 --port 8000"
     networks:
       - todo-network
 
